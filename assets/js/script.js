@@ -2,61 +2,46 @@
 var currentDay = moment().format('dddd Do MMMM YYYY');
 $('#currentDay').text(currentDay);
 
-// save current day to localStorage 
-// set element root as container for rows
-let listRoot = $('.container');
-// set row section
-let rowSection = $('<div>');
-rowSection.addClass('row');
-// set time place
-let hour = $('<div>');
-hour.addClass('hour');
-//set textarea
-let timeBlock = $('<textarea>');
-timeBlock.addClass('timeBlock');
-//set save button
-let save = $('<button>');
-save.addClass('saveBtn');
+// Save the entered text in local storage when the save button is clicked in that timeblock.
+$(".saveBtn").on("click", function () {
+    let time = $(this).siblings('.hour').attr('id');
+    let textExtract = $(this).siblings('.time-block').val();
+    localStorage.setItem(time, textExtract);
+});
 
+// load text from local storage using hour id as key reference
+$(".hour").each(function () {
+    let time = $(this).attr('id');
+    let value = localStorage.getItem(time);
+    $(this).siblings('.time-block').text(value);
+});
 
-// put main into local if empty or if local day != current day
-if (!localStorage.busObj) {
-    localStorage.setItem('busObj', JSON.stringify(businessDayObj));
-}
+// set text area colour based on current time
+// get current time as number 24hr
+let nowCheck = parseInt(moment().format('HH'));
+// loop through rows and set background colour
+$(".hour").each(function () {
+    let timeText = $(this).text();
 
-//  set main to local
-businessDayObj = JSON.parse(localStorage.getItem('busObj'));
+    let add2Time = 0;
+    // convert to number & manage 24hr
+    if (timeText.slice(-2) === 'PM' && timeText.slice(0, 2) !== '12') {
 
-// Present timeblocks for standard business hours when the user scrolls down.
-//create row
-function createRow() {
-
-}
-
-// append rows for workday
-
-//  set text from main
-
-
-
-// loop through main object to populate rows
-
-//  Load timeline for the day and time blocks for each hour beside the timeline;
-var nowCheck = moment();
-var time1 = moment('23', 'hh');
-
-//setting colour base on time
-var gap = time1.diff(nowCheck, 'hours');
-$('#hour1').text(gap);
-console.log(gap);
-var timeBlock1 = document.querySelector(".time-block");
-if (gap < 0) {
-    timeBlock1.classList.add('past');
-} else if (gap > 0) {
-    timeBlock1.classList.add('future');
-} else {
-    timeBlock1.classList.add('present');
-}
-
-
-// Save the event in local storage when the save button is clicked in that timeblock.
+    }
+    let time = parseInt(timeText.slice(0, 2));
+    time = time + add2Time;
+    let block = $(this).siblings('textarea');
+    if (nowCheck > time) {
+        block.addClass('past');
+        block.removeClass('future');
+        block.removeClass('present');
+    } else if (nowCheck < time) {
+        block.addClass('future');
+        block.removeClass('past');
+        block.removeClass('present');
+    } else {
+        block.addClass('present');
+        block.removeClass('future');
+        block.removeClass('past');
+    }
+});
